@@ -1,27 +1,27 @@
 {
-    "name": "My awesome PWA app",
-    "short_name": "PWA App",
-    "icons": [
-      {
-        "src": "/icon512_rounded.png",
-        "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "any maskable"
-      },
-      {
-        "src": "/icon512_rounded.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      },
-      {
-        "src": "/icon512_rounded.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ],
-    "theme_color": "#FFFFFF",
-    "background_color": "#FFFFFF",
-    "start_url": "/",
-    "display": "standalone",
-    "orientation": "portrait"
-  }
+  "name": "Colab Nest",
+  "short_name": "PWA App",
+  "icons": [
+    {
+      "src": "/logo copy.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo copy.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo copy.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#FFFFFF",
+  "background_color": "#FFFFFF",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}

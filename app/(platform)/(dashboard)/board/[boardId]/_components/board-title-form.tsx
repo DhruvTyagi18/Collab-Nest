@@ -35,7 +35,7 @@ export function BoardTitleForm({ initialData }: BoardTitleFormProps) {
   const { mutate, isLoading } = trpc.board.updateBoard.useMutation({
     onSuccess: (data) => {
       toast.success(`Board "${data.title}" updated!`)
-      document.title = `${data.title} | Taskify`
+      document.title = `${data.title} | Colab Nest`
       disableEditing()
       refetch()
     },
