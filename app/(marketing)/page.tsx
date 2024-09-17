@@ -35,7 +35,7 @@ export default function MarketingPage() {
           textFont.className
         )}
       >
-         "Colab Nest: Empower Your Team, Anywhere, Anytime."
+         Colab Nest: Empower Your Team, Anywhere, Anytime.
       </div>
       <Button className="mt-6" size="lg" asChild>
         <Link href="/sign-up">Try Colab Nest for free</Link>
