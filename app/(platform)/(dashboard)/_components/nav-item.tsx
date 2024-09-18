@@ -27,7 +27,7 @@ export function NavItem({ isActive, isExpanded, organization, onExpand }: NavIte
 
   const routes = [
     {
-      label: 'Boards',
+      label: 'Divisions',
       icon: <Layout className="mr-2 h-4 w-4" />,
       href: `/organization/${organization.id}`,
     },
