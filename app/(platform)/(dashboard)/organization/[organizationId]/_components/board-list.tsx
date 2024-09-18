@@ -34,7 +34,7 @@ export async function BoardList() {
     <div className="space-y-4">
       <div className="flex items-center text-lg font-semibold text-neutral-700">
         <User2 className="mr-2 h-6 w-6" />
-        Your boards
+        Divisions
       </div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {boards?.map((board) => (
