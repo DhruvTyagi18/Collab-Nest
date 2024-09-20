@@ -17,8 +17,13 @@ export function CardModal() {
     cardId: id ?? '',
   })
 
+  const handleClose = () => {
+    onClose()  
+    window.location.reload(); 
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
         {!cardData ? (
           <Header.Skeleton />

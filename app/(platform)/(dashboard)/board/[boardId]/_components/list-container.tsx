@@ -141,24 +141,18 @@ export function ListContainer({ boardId, initialData }: ListContainerProps) {
   }
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="lists" type="list" direction="horizontal">
-        {(provided) => (
-          <ol {...provided.droppableProps} ref={provided.innerRef} className="flex h-full gap-x-3">
-            {orderedData.map((list, index) => (
-              <ListItem
-                data={list as any}
-                index={index}
-                refetchLists={refetchLists}
-                key={list.id}
-              />
-            ))}
-            {provided.placeholder}
-            <ListForm refetchLists={refetchLists} />
-            <div className="w-1 flex-shrink-0" aria-hidden="true" />
-          </ol>
-        )}
-      </Droppable>
-    </DragDropContext>
-  )
+    <ol className="flex flex-wrap gap-3 h-[80vh] overflow-y-auto">
+      {orderedData.map((list, index) => (
+        <ListItem
+          data={list as any}
+          index={index}
+          refetchLists={refetchLists}
+          key={list.id}
+        />
+      ))}
+      <ListForm refetchLists={refetchLists} />
+      <div className="w-full flex-shrink-0" aria-hidden="true" />
+    </ol>
+  );
+  
 }

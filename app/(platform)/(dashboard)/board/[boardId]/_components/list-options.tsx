@@ -68,13 +68,6 @@ export function ListOptions({ data, refetchLists, onAddCart }: ListOptionsProps)
         </PopoverClose>
 
         <Button
-          onClick={onAddCart}
-          className="h-auto w-full justify-start rounded-none p-2 px-5 text-sm font-normal"
-          variant="ghost"
-        >
-          Add card...
-        </Button>
-        <Button
           className="h-auto w-full justify-start rounded-none p-2 px-5 text-sm font-normal"
           variant="ghost"
           disabled={isLoadingCopy}

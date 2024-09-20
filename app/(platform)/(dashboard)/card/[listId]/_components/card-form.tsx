@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, X } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
 import { ElementRef, KeyboardEventHandler, forwardRef, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -17,16 +16,15 @@ import { trpc } from '@/trpc/client'
 type CardFormProps = {
   listId: string
   isEditing: boolean
-  refetchLists: any
+  boardId: string
   enableEditing: () => void
   disableEditing: () => void
+  onCardAdded: (Card: any) => void; 
 }
 
 export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
-  ({ listId, isEditing, refetchLists, enableEditing, disableEditing }, ref) => {
+  ({ listId, isEditing, boardId, enableEditing, disableEditing, onCardAdded }, ref) => {
     const formRef = useRef<ElementRef<'form'>>(null)
-
-    const params = useParams()
 
     const formSchema = z.object({
       title: z.string().min(3, { message: 'Title is too short.' }),
@@ -40,11 +38,12 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
     })
 
     const { mutate, isLoading } = trpc.card.createCard.useMutation({
-      onSuccess: ({ card }) => {
+      onSuccess: (data) => {
+        const card = data.card;
         toast.success(`Card "${card.title}" created`)
         form.reset()
         disableEditing()
-        refetchLists()
+        onCardAdded(card); 
       },
       onError: (err) => {
         toast.error(err.message)
@@ -52,8 +51,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
     })
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
-      console.log(values)
-      mutate({ title: values.title, boardId: params.boardId as string, listId })
+      mutate({ title: values.title, boardId: boardId as string, listId });
     }
 
     const onKeyDown = (e: any) => {
@@ -104,7 +102,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
               <Button type="submit" variant="primary" disabled={isLoading}>
                 Add card
               </Button>
-              <Button type="submit" onClick={disableEditing} size="sm" variant="ghost">
+              <Button type="button" onClick={disableEditing} size="sm" variant="ghost">
                 <X className="h-5 w-5" />
               </Button>
             </div>
@@ -117,7 +115,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       <div className="px-2 pt-2">
         <Button
           onClick={enableEditing}
-          className="h-auto w-full justify-start px-2 py-1.5 text-sm text-muted-foreground"
+          className="h-auto w-full justify-start px-2 py-1.5 text-sm text-white"
           size="sm"
           variant="ghost"
         >

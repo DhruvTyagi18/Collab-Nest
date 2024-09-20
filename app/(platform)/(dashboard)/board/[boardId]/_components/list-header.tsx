@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useEventListener } from 'usehooks-ts'
 import { z } from 'zod'
+import { useRouter } from 'next/navigation' // Import useRouter for navigation
 
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -20,8 +21,8 @@ type ListHeaderProps = {
 export function ListHeader({ data, refetchLists, onAddCard }: ListHeaderProps) {
   const formRef = useRef<ElementRef<'form'>>(null)
   const inputRef = useRef<ElementRef<'input'>>(null)
-
   const [isEditing, setIsEditing] = useState(false)
+  const router = useRouter() // Initialize useRouter for navigation
 
   const enableEditing = () => {
     setIsEditing(true)
@@ -83,6 +84,11 @@ export function ListHeader({ data, refetchLists, onAddCard }: ListHeaderProps) {
 
   useEventListener('keydown', onKeyDown)
 
+  // Function to navigate to the list details page using the list ID
+  const handleNavigate = () => {
+    router.push(`/card/${data.id}`) 
+  }
+
   return (
     <div className="flex items-start justify-between gap-x-2 px-2 pt-2 text-sm font-semibold">
       {isEditing ? (
@@ -111,8 +117,8 @@ export function ListHeader({ data, refetchLists, onAddCard }: ListHeaderProps) {
         </Form>
       ) : (
         <div
-          className="h-7 w-full border-transparent px-2.5 py-1 text-sm font-medium"
-          onClick={enableEditing}
+          className="h-7 w-full border-transparent px-2.5 py-1 text-sm font-medium cursor-pointer"
+          onClick={handleNavigate} // Navigate when clicking on the list header
         >
           {form.getValues('title')}
         </div>

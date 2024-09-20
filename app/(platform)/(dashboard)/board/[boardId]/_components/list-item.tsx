@@ -1,76 +1,81 @@
-'use client'
-
-import { ElementRef, useRef, useState } from 'react'
-import { Draggable, Droppable } from '@hello-pangea/dnd'
-
-import { cn } from '@/lib/utils'
-import { ListWithCards } from '@/types'
-import { CardForm } from './card-form'
-import { CardItem } from './card-item'
-import { ListHeader } from './list-header'
+import { ElementRef, useRef, useState } from 'react';
+import { Draggable } from '@hello-pangea/dnd';
+import { ListWithCards } from '@/types';
+import { ListHeader } from './list-header';
+import { trpc } from '@/trpc/client';
+import { toast } from 'sonner';
 
 type ListItemProps = {
-  data: ListWithCards
-  index: number
-  refetchLists: any
-}
+  data: ListWithCards;
+  index: number;
+  refetchLists: any;
+};
 
 export function ListItem({ data, index, refetchLists }: ListItemProps) {
-  const textAreaRef = useRef<ElementRef<'textarea'>>(null)
+  const textAreaRef = useRef<ElementRef<'textarea'>>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [description, setDescription] = useState(data.description || '');
 
-  const [isEditing, setIsEditing] = useState(false)
+  // Use the trpc mutation hook
+  const updateDescriptionMutation = trpc.list.updateDescription.useMutation();
 
   const enableEditing = () => {
-    setIsEditing(true)
+    setIsEditing(true);
     setTimeout(() => {
-      textAreaRef.current?.focus()
-    })
-  }
+      textAreaRef.current?.focus();
+    });
+  };
 
   const disableEditing = () => {
-    setIsEditing(false)
-  }
+    setIsEditing(false);
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(e.target.value);
+  };
+
+  const handleDescriptionSave = async () => {
+    try {
+      // Trigger the mutation to update the description in the database
+      await updateDescriptionMutation.mutateAsync({
+        id: data.id,
+        description,
+      });
+
+      toast.success('Description updated successfully!');
+      // Refetch lists if necessary
+      refetchLists();
+    } catch (error) {
+      console.error('Failed to update description:', error);
+    } finally {
+      disableEditing();
+    }
+  };
 
   return (
-    <Draggable draggableId={data.id} index={index}>
-      {(provided) => (
-        <li
-          {...provided.draggableProps}
-          ref={provided.innerRef}
-          className="h-full w-[272px] shrink-0 select-none"
-        >
+    <li className="w-[272px] shrink-0 select-none">
+      <div className="w-full rounded-md bg-[#f1f2f4] pb-2 shadow-md">
+        <ListHeader data={data} onAddCard={enableEditing} refetchLists={refetchLists} />
+        {/* Description Box */}
+        {isEditing ? (
+          <textarea
+            ref={textAreaRef}
+            value={description}
+            onChange={handleDescriptionChange}
+            onBlur={handleDescriptionSave}
+            className="w-full p-2 border rounded"
+            rows={4}
+          />
+        ) : (
           <div
-            {...provided.dragHandleProps}
-            className="w-full rounded-md bg-[#f1f2f4] pb-2 shadow-md"
+            onClick={enableEditing}
+            className="p-2 text-gray-600 cursor-pointer text-xs whitespace-pre-wrap" // Add this class to preserve newlines
           >
-            <ListHeader data={data} onAddCard={enableEditing} refetchLists={refetchLists} />
-            <Droppable droppableId={data.id} type="card">
-              {(provided) => (
-                <ol
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className={cn(
-                    'mx-1 flex flex-col gap-y-2 px-1 py-0.5',
-                    data.cards.length > 0 ? 'mt-2' : 'mt-0'
-                  )}
-                >
-                  {data.cards.map((card, index) => (
-                    <CardItem data={card} index={index} refetchLists={refetchLists} key={card.id} />
-                  ))}
-                  {provided.placeholder}
-                </ol>
-              )}
-            </Droppable>
-            <CardForm
-              listId={data.id}
-              isEditing={isEditing}
-              enableEditing={enableEditing}
-              disableEditing={disableEditing}
-              refetchLists={refetchLists}
-            />
+            {description || 'Click here to add a description...'}
           </div>
-        </li>
-      )}
-    </Draggable>
-  )
+        )}
+      </div>
+    </li>
+  );
+  
 }

@@ -48,7 +48,6 @@ export function Description({
     onSuccess: ({ card }) => {
       toast.success(`Card "${card.title} updated"`)
       disableEditing()
-      refetchLists()
       refetchCard()
       refetchAuditLogs()
     },
@@ -78,7 +77,7 @@ export function Description({
     const { description } = values
     mutate({
       id: data.id,
-      boardId: params.boardId as string,
+      listId: params.listId as string,
       description,
     })
   }

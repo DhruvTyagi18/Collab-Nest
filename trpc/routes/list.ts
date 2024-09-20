@@ -1,13 +1,64 @@
 import { auth } from '@clerk/nextjs'
 import { ACTION, ENTITY_TYPE } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-import { z } from 'zod'
+import { string, z } from 'zod'
 
 import { createAuditLog } from '@/lib/create-audit-log'
 import prisma from '@/lib/db'
 import { publicProcedure, router } from '../trpc'
 
+
 export const listRouter = router({
+
+  updateDescription: publicProcedure
+  .input(
+    z.object({
+      id: z.string(),
+      description: z.string().nullable(),
+    })
+  )
+  .mutation(async ({ input }) => {
+    const { id, description } = input;
+
+    try {
+      // Update the list description using Prisma
+      const updatedList = await prisma.list.update({
+        where: { id },
+        data: { description },
+      });
+
+      return updatedList;
+    } catch (error) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: `List with ID ${id} not found`,
+      });
+    }
+  }),
+
+  getListById: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+    const { userId, orgId } = auth()
+
+    if (!userId || !orgId) {
+      throw new TRPCError({ code: 'UNAUTHORIZED' })
+    }
+
+    const { id } = input
+
+    try {
+      const list = await prisma.list.findUnique({
+        where: {
+          id
+        },
+      })
+
+      return list
+    } catch (error) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: `Something went wrong - ${error}` })
+    }
+  }),
+
+
   getLists: publicProcedure.input(z.object({ boardId: z.string() })).query(async ({ input }) => {
     const { userId, orgId } = auth()
 

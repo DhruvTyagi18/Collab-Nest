@@ -7,24 +7,25 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useCardModal } from '@/hooks/use-card-modal'
 import { trpc } from '@/trpc/client'
 import { CardWithList } from '@/types'
+import { Card } from '@prisma/client'
 
 type ActionsProps = {
   data: CardWithList
-  refetchLists: any
+  refetchLists: ()=>void
 }
 
-export function Actions({ data, refetchLists }: ActionsProps) {
+export function Actions({ data,refetchLists }: ActionsProps) {
   const params = useParams()
   const { onClose } = useCardModal()
 
   const { mutate: mutateCopyCard, isLoading: isLoadingCopyCard } = trpc.card.copyCard.useMutation({
     onSuccess: ({ card }) => {
       toast.success(`Card "${card.title}" copied`)
-      refetchLists()
+      window.location.reload()  
       onClose()
     },
     onError: (err) => {
-      toast.error(err.data?.code)
+      toast.error(err.message)
     },
   })
 
@@ -32,20 +33,20 @@ export function Actions({ data, refetchLists }: ActionsProps) {
     trpc.card.deleteCard.useMutation({
       onSuccess: ({ card }) => {
         toast.success(`Card "${card.title}" deleted`)
-        refetchLists()
+        window.location.reload()  
         onClose()
       },
       onError: (err) => {
-        toast.error(err.data?.code)
+        toast.error(err.message)
       },
     })
 
   const onCopy = () => {
-    mutateCopyCard({ id: data.id, boardId: params.boardId as string })
+    mutateCopyCard({ id: data.id, listId: params.listId as string })
   }
 
   const onDelete = () => {
-    mutateDeleteCard({ id: data.id, boardId: params.boardId as string })
+    mutateDeleteCard({ id: data.id, listId: params.listId as string })
   }
 
   return (

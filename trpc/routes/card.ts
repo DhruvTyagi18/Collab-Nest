@@ -115,11 +115,11 @@ export const cardRouter = router({
       }
     }),
 
-  updateCard: publicProcedure
+    updateCard: publicProcedure
     .input(
       z.object({
         id: z.string(),
-        boardId: z.string(),
+        listId: z.string(),  // Changed from boardId to listId
         title: z
           .string({
             required_error: 'Title is required',
@@ -138,19 +138,20 @@ export const cardRouter = router({
     )
     .mutation(async ({ input }) => {
       const { userId, orgId } = auth()
-
+  
       if (!userId || !orgId) {
         throw new TRPCError({ code: 'UNAUTHORIZED' })
       }
-
-      const { boardId, description, id, title } = input
-
+  
+      const { listId, description, id, title } = input
+  
       try {
+        // Update the card with the given id in the specified list
         const card = await prisma.card.update({
           where: {
             id,
             list: {
-              boardId,
+              id: listId,
               board: {
                 orgId,
               },
@@ -161,56 +162,63 @@ export const cardRouter = router({
             description,
           },
         })
-
+  
+        // Create an audit log entry for the card update
         await createAuditLog({
           entityId: card.id,
           entityTitle: card.title,
           entityType: ENTITY_TYPE.CARD,
           action: ACTION.UPDATE,
         })
-
+  
         return { card }
       } catch (error) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: `Something went wrong - ${error}` })
       }
     }),
+  
 
-  deleteCard: publicProcedure
-    .input(z.object({ id: z.string(), boardId: z.string() }))
-    .mutation(async ({ input }) => {
-      const { userId, orgId } = auth()
+    deleteCard: publicProcedure
+  .input(z.object({ id: z.string(), listId: z.string() }))
+  .mutation(async ({ input }) => {
+    const { userId, orgId } = auth();
 
-      if (!userId || !orgId) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
+    if (!userId || !orgId) {
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+
+    const { id, listId } = input;
+
+    try {
+      // Optional: Validate the card exists in the list
+      const card = await prisma.card.findUnique({
+        where: { id },
+        include: { list: true },
+      });
+
+      if (!card || card.listId !== listId) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Card does not belong to the specified list.' });
       }
 
-      const { id, boardId } = input
+      // Delete the card
+      const deletedCard = await prisma.card.delete({
+        where: { id },
+      });
 
-      try {
-        const card = await prisma.card.delete({
-          where: {
-            id,
-            list: {
-              boardId,
-              board: {
-                orgId,
-              },
-            },
-          },
-        })
+      await createAuditLog({
+        entityId: deletedCard.id,
+        entityTitle: deletedCard.title,
+        entityType: ENTITY_TYPE.CARD,
+        action: ACTION.DELETE,
+      });
 
-        await createAuditLog({
-          entityId: card.id,
-          entityTitle: card.title,
-          entityType: ENTITY_TYPE.CARD,
-          action: ACTION.DELETE,
-        })
+      return { card: deletedCard };
+    } catch (error) {
+      console.error('Error deleting card:', error);
+      throw new TRPCError({ code: 'BAD_REQUEST', message: `Something went wrong - ${error}` });
+    }
+  }),
 
-        return { card }
-      } catch (error) {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: `Something went wrong - ${error}` })
-      }
-    }),
 
   updateCardOrder: publicProcedure
     .input(
@@ -262,43 +270,34 @@ export const cardRouter = router({
       }
     }),
 
-  copyCard: publicProcedure
-    .input(z.object({ id: z.string(), boardId: z.string() }))
+    copyCard: publicProcedure
+    .input(z.object({ id: z.string(), listId: z.string() }))
     .mutation(async ({ input }) => {
       const { userId, orgId } = auth()
-
+  
       if (!userId || !orgId) {
         throw new TRPCError({ code: 'UNAUTHORIZED' })
       }
-
-      const { id, boardId } = input
-
+  
+      const { id, listId } = input
+  
       try {
+        // Fetch the card to be copied
         const cardToCopy = await prisma.card.findUnique({
           where: {
             id,
-            list: {
-              boardId,
-              board: {
-                orgId,
-              },
-            },
+            listId,
           },
         })
-
+  
         if (!cardToCopy) {
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Card not found' })
         }
-
+  
+        // Find the last card in the same list to determine the new order
         const lastCard = await prisma.card.findFirst({
           where: {
-            listId: cardToCopy.listId,
-            list: {
-              boardId,
-              board: {
-                orgId,
-              },
-            },
+            listId,
           },
           orderBy: {
             order: 'desc',
@@ -307,9 +306,10 @@ export const cardRouter = router({
             order: true,
           },
         })
-
+  
         const newOrder = lastCard ? lastCard.order + 1 : 1
-
+  
+        // Create a new card with copied details
         const card = await prisma.card.create({
           data: {
             title: `${cardToCopy.title} - Copy`,
@@ -318,17 +318,19 @@ export const cardRouter = router({
             listId: cardToCopy.listId,
           },
         })
-
+  
+        // Log the creation of the new card
         await createAuditLog({
           entityId: card.id,
           entityTitle: card.title,
           entityType: ENTITY_TYPE.CARD,
           action: ACTION.CREATE,
         })
-
+  
         return { card }
       } catch (error) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: `Something went wrong - ${error}` })
       }
     }),
+  
 })

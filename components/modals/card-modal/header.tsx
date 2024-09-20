@@ -41,7 +41,6 @@ export function Header({ data, refetchCard, refetchLists, refetchAuditLogs }: He
     onSuccess: ({ card }) => {
       toast.success(`Renamed to "${card.title}"`)
       form.setValue('title', card.title)
-      refetchLists()
       refetchCard()
       refetchAuditLogs()
     },
@@ -62,7 +61,7 @@ export function Header({ data, refetchCard, refetchLists, refetchAuditLogs }: He
 
     mutate({
       id: data.id,
-      boardId: params.boardId as string,
+      listId: params.listId as string,
       title,
     })
   }
