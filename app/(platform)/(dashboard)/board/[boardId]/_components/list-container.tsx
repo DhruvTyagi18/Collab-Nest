@@ -12,6 +12,7 @@ import { ListItem } from './list-item'
 type ListContainerProps = {
   boardId: string
   initialData: ListWithCards[]
+  orgId: string
 }
 
 function reorder<T>(list: T[], startIndex: number, endIndex: number) {
@@ -22,7 +23,7 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number) {
   return result
 }
 
-export function ListContainer({ boardId, initialData }: ListContainerProps) {
+export function ListContainer({ boardId, initialData,orgId }: ListContainerProps) {
   const { data, refetch: refetchLists } = trpc.list.getLists.useQuery(
     { boardId },
     {
@@ -148,6 +149,7 @@ export function ListContainer({ boardId, initialData }: ListContainerProps) {
           index={index}
           refetchLists={refetchLists}
           key={list.id}
+          orgId={orgId}
         />
       ))}
       <ListForm refetchLists={refetchLists} />

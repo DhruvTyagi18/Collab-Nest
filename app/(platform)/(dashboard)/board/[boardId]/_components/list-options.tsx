@@ -9,15 +9,20 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { trpc } from '@/trpc/client'
+import { checkUserRole } from '@/app/api/utils/userUtils';
+import { SignedIn, useSession } from '@clerk/nextjs';
 
 type ListOptionsProps = {
   data: List
   refetchLists: any
   onAddCart: () => void
+  orgId:string
 }
 
-export function ListOptions({ data, refetchLists, onAddCart }: ListOptionsProps) {
+export function ListOptions({ data, refetchLists, onAddCart,orgId }: ListOptionsProps) {
   const closeRef = useRef<ElementRef<'button'>>(null)
+  const { session } = useSession();
+  const userRole = checkUserRole(session,orgId);
 
   const { mutate: mutateCopy, isLoading: isLoadingCopy } = trpc.list.copyList.useMutation({
     onSuccess: ({ list }) => {
@@ -50,41 +55,44 @@ export function ListOptions({ data, refetchLists, onAddCart }: ListOptionsProps)
   }
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button className="h-auto w-auto p-2" variant="ghost">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="px-0 pb-3 pt-3" side="bottom" align="start">
-        <div className="pb-4 text-center text-sm font-medium text-neutral-600">List actions</div>
-        <PopoverClose asChild ref={closeRef}>
-          <Button
-            className="absolute right-2 top-2 h-auto w-auto p-2 text-neutral-600"
-            variant="ghost"
-          >
-            <X className="h-4 w-4" />
+    <SignedIn>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button className="h-auto w-auto p-2" variant="ghost">
+            <MoreHorizontal className="h-4 w-4" />
           </Button>
-        </PopoverClose>
+        </PopoverTrigger>
+        <PopoverContent className="px-0 pb-3 pt-3" side="bottom" align="start">
+          <div className="pb-4 text-center text-sm font-medium text-neutral-600">List actions</div>
+          <PopoverClose asChild ref={closeRef}>
+            <Button
+              className="absolute right-2 top-2 h-auto w-auto p-2 text-neutral-600"
+              variant="ghost"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </PopoverClose>
 
-        <Button
-          className="h-auto w-full justify-start rounded-none p-2 px-5 text-sm font-normal"
-          variant="ghost"
-          disabled={isLoadingCopy}
-          onClick={onCopy}
-        >
-          Copy list...
-        </Button>
-        <Separator />
-        <Button
-          className="h-auto w-full justify-start rounded-none p-2 px-5 text-sm font-normal"
-          variant="ghost"
-          disabled={isLoadingDelete}
-          onClick={onDelete}
-        >
-          Delete this list...
-        </Button>
-      </PopoverContent>
-    </Popover>
+          <Button
+            className="h-auto w-full justify-start rounded-none p-2 px-5 text-sm font-normal"
+            variant="ghost"
+            disabled={isLoadingCopy}
+            onClick={onCopy}
+          >
+            Copy list...
+          </Button>
+          <Separator />
+          {userRole === 'org:admin' && (
+          <Button
+            className="h-auto w-full justify-start rounded-none p-2 px-5 text-sm font-normal"
+            variant="ghost"
+            disabled={isLoadingDelete}
+            onClick={onDelete}
+          >
+            Delete this list...
+          </Button>)}
+        </PopoverContent>
+      </Popover>
+    </SignedIn>
   )
 }

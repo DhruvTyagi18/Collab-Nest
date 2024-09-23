@@ -16,9 +16,10 @@ type ListHeaderProps = {
   data: List
   refetchLists: any
   onAddCard: () => void
+  orgId:string
 }
 
-export function ListHeader({ data, refetchLists, onAddCard }: ListHeaderProps) {
+export function ListHeader({ data, refetchLists, onAddCard,orgId }: ListHeaderProps) {
   const formRef = useRef<ElementRef<'form'>>(null)
   const inputRef = useRef<ElementRef<'input'>>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -124,7 +125,7 @@ export function ListHeader({ data, refetchLists, onAddCard }: ListHeaderProps) {
         </div>
       )}
 
-      <ListOptions data={data} onAddCart={onAddCard} refetchLists={refetchLists} />
+      <ListOptions data={data} onAddCart={onAddCard} refetchLists={refetchLists} orgId={orgId} />
     </div>
   )
 }

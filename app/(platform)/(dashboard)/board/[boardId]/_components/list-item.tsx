@@ -9,9 +9,10 @@ type ListItemProps = {
   data: ListWithCards;
   index: number;
   refetchLists: any;
+  orgId:string;
 };
 
-export function ListItem({ data, index, refetchLists }: ListItemProps) {
+export function ListItem({ data, index, refetchLists,orgId }: ListItemProps) {
   const textAreaRef = useRef<ElementRef<'textarea'>>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(data.description || '');
@@ -55,7 +56,7 @@ export function ListItem({ data, index, refetchLists }: ListItemProps) {
   return (
     <li className="w-[272px] shrink-0 select-none">
       <div className="w-full rounded-md bg-[#f1f2f4] pb-2 shadow-md">
-        <ListHeader data={data} onAddCard={enableEditing} refetchLists={refetchLists} />
+        <ListHeader data={data} onAddCard={enableEditing} refetchLists={refetchLists} orgId={orgId} />
         {/* Description Box */}
         {isEditing ? (
           <textarea

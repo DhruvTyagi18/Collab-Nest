@@ -7,14 +7,19 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { trpc } from '@/trpc/client'
+import { checkUserRole } from '@/app/api/utils/userUtils';
+import { SignedIn, useSession } from '@clerk/nextjs';
 
 type ListOptionsProps = {
   id: string
   boardId: string
+  orgId:string
 }
 
-export function ListOptions({ id,boardId }: ListOptionsProps) {
+export function ListOptions({ id,boardId,orgId }: ListOptionsProps) {
   const router = useRouter()
+  const { session } = useSession();
+  const userRole = checkUserRole(session,orgId);
 
   const { mutate, isLoading } = trpc.list.deleteList.useMutation({
     onSuccess: ({ boardId }) => {
@@ -33,6 +38,8 @@ export function ListOptions({ id,boardId }: ListOptionsProps) {
   }
 
   return (
+    <SignedIn>
+      {userRole === 'org:admin' && (
     <Popover>
       <PopoverTrigger asChild>
         <Button className="h-auto w-auto p-2" variant="transparent">
@@ -58,6 +65,7 @@ export function ListOptions({ id,boardId }: ListOptionsProps) {
           Delete this List
         </Button>
       </PopoverContent>
-    </Popover>
+    </Popover>)}
+    </SignedIn>
   )
 }

@@ -51,7 +51,7 @@ export default async function ListIdLayout({
       style={{ backgroundImage: `url(${board.imageFullUrl})` }}
       className="relative h-full bg-cover bg-center bg-no-repeat"
     >
-      <ListNavbar list={list} />
+      <ListNavbar list={list} orgId={orgId}/>
       <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
       <main className="relative h-full pt-28">{children}</main>
     </div>

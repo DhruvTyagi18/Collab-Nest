@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation'
 
 type ListNavbarProps = {
   list: List
+  orgId:string
 }
 
-export function ListNavbar({ list }: ListNavbarProps) {
+export function ListNavbar({ list,orgId }: ListNavbarProps) {
   const router = useRouter()
 
   const handleBackClick = () => {
@@ -23,7 +24,7 @@ export function ListNavbar({ list }: ListNavbarProps) {
       </button>
       <ListTitleForm initialData={list} boardId={list.boardId} />
       <div className="ml-auto">
-        <ListOptions id={list.id} boardId={list.boardId} />
+        <ListOptions id={list.id} boardId={list.boardId} orgId={orgId}/>
       </div>
     </div>
   )
