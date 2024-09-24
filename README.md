@@ -4,8 +4,6 @@ This is a Fullstack Trello Clone with Next.js 14, React, tRPC, Tanstack Query, P
 
 ## Screenshot(s)
 <img width="1439" alt="image" src="https://github.com/user-attachments/assets/6ac8c9b5-7901-4cea-a04b-402af41e6d24">
-
-![Landing Page Screenshot](documentation/landing-page-screenshot.jpg 'Landing Page Screenshot')
 ![Organization Page Screenshot](documentation/organization-id-page-screenshot.jpg 'Organization Page Screenshot')
 ![Board Page Screenshot](documentation/board-id-page-screenshot.jpg 'Board Page Screenshot')
 
