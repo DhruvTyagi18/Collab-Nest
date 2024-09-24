@@ -20,6 +20,7 @@ export function Sidebar({ storageKey = 't-sidebar-state' }: SidebarProps) {
   const { userMemberships, isLoaded: isLoadedOrgList } = useOrganizationList({
     userMemberships: {
       infinite: true,
+      pageSize:30,
     },
   })
 
