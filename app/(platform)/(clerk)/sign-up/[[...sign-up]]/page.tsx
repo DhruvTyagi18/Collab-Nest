@@ -24,7 +24,7 @@ export default function Page() {
     <div>
       {/* CAPTCHA */}
       <ReCAPTCHA
-        sitekey="6LcNlVIqAAAAAMERqPDMqxdDXr2dzxXywGnNWLW4"  // Replace with your Google reCAPTCHA site key
+        sitekey="6LcNlVIqAAAAAMERqPDMqxdDXr2dzxXywGnNWLW4"   // Replace with your Google reCAPTCHA site key
         onChange={onCaptchaChange}
       />
 
