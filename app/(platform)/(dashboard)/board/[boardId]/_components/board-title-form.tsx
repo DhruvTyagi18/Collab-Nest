@@ -10,16 +10,21 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { trpc } from '@/trpc/client'
+import { useSession } from '@clerk/nextjs'
+import { checkUserRole } from '@/app/api/utils/userUtils'
 
 type BoardTitleFormProps = {
   initialData: Board
+  orgId: string
 }
 
-export function BoardTitleForm({ initialData }: BoardTitleFormProps) {
+export function BoardTitleForm({ initialData,orgId }: BoardTitleFormProps) {
   const formRef = useRef<ElementRef<'form'>>(null)
   const inputRef = useRef<ElementRef<'input'>>(null)
 
   const [isEditing, setIsEditing] = useState(false)
+  const { session } = useSession();
+  const userRole = checkUserRole(session,orgId);
 
   const { data, refetch } = trpc.board.getBoardById.useQuery(
     { id: initialData.id },
@@ -112,6 +117,7 @@ export function BoardTitleForm({ initialData }: BoardTitleFormProps) {
     )
   }
 
+  if (userRole === 'org:admin'){
   return (
     <Button
       className="h-auto w-auto p-1 px-2 text-lg font-bold"
@@ -121,4 +127,6 @@ export function BoardTitleForm({ initialData }: BoardTitleFormProps) {
       {form.getValues('title')}
     </Button>
   )
+}
+return <p className="text-lg font-bold">{form.getValues('title')}</p>
 }

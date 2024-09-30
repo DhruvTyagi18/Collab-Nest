@@ -19,12 +19,15 @@ import {
 } from '@/lib/validators/create-board-validator'
 import { trpc } from '@/trpc/client'
 import { FormPicker } from './form-picker'
+import { useSession } from '@clerk/nextjs'
+import { checkUserRole } from '@/app/api/utils/userUtils'
 
 type FormPopoverProps = {
   children: React.ReactNode
   side?: 'left' | 'right' | 'top' | 'bottom'
   align?: 'start' | 'center' | 'end'
   sideOffset?: number
+  orgId: string
 }
 
 export function FormPopover({
@@ -32,10 +35,13 @@ export function FormPopover({
   align,
   side = 'bottom',
   sideOffset = 0,
+  orgId
 }: FormPopoverProps) {
   const { onOpen } = useProModal()
   const router = useRouter()
   const closeRef = useRef<ElementRef<'button'>>(null)
+  const { session } = useSession();
+  const userRole = checkUserRole(session, orgId); // Get user role
 
   const form = useForm<TCreateBoardValidator>({
     resolver: zodResolver(CreateBoardValidator),
@@ -56,7 +62,6 @@ export function FormPopover({
 
   function onSubmit(values: TCreateBoardValidator) {
     const { title, image } = values
-    // console.log(values)
     mutate({ title, image })
   }
 
@@ -74,59 +79,65 @@ export function FormPopover({
           </Button>
         </PopoverClose>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <FormPicker
-                      onClick={(value) =>
-                        form.setValue(field.name, value, {
-                          shouldDirty: true,
-                          shouldTouch: true,
-                          shouldValidate: true,
-                        })
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <Label className="font-semibold text-neutral-700" htmlFor={field.name}>
-                    Board Title
-                  </Label>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter title"
-                      {...field}
-                      className="h-7 px-2 py-1 text-sm"
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              className="w-full"
-              size="sm"
-              variant="primary"
-              type="submit"
-              disabled={isLoading}
-            >
-              Create
-            </Button>
-          </form>
-        </Form>
+        {userRole === 'org:admin' ? ( // Only show the form if the user is an admin
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <FormPicker
+                        onClick={(value) =>
+                          form.setValue(field.name, value, {
+                            shouldDirty: true,
+                            shouldTouch: true,
+                            shouldValidate: true,
+                          })
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <Label className="font-semibold text-neutral-700" htmlFor={field.name}>
+                      Board Title
+                    </Label>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter title"
+                        {...field}
+                        className="h-7 px-2 py-1 text-sm"
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                className="w-full"
+                size="sm"
+                variant="primary"
+                type="submit"
+                disabled={isLoading}
+              >
+                Create
+              </Button>
+            </form>
+          </Form>
+        ) : (
+          <div className="text-center text-sm text-red-600">
+            You do not have permission to create a board.
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   )

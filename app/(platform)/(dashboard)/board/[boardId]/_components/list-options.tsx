@@ -9,8 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { trpc } from '@/trpc/client'
-import { checkUserRole } from '@/app/api/utils/userUtils';
-import { SignedIn, useSession } from '@clerk/nextjs';
 
 type ListOptionsProps = {
   data: List
@@ -21,8 +19,6 @@ type ListOptionsProps = {
 
 export function ListOptions({ data, refetchLists, onAddCart,orgId }: ListOptionsProps) {
   const closeRef = useRef<ElementRef<'button'>>(null)
-  const { session } = useSession();
-  const userRole = checkUserRole(session,orgId);
 
   const { mutate: mutateCopy, isLoading: isLoadingCopy } = trpc.list.copyList.useMutation({
     onSuccess: ({ list }) => {
@@ -55,7 +51,6 @@ export function ListOptions({ data, refetchLists, onAddCart,orgId }: ListOptions
   }
 
   return (
-    <SignedIn>
       <Popover>
         <PopoverTrigger asChild>
           <Button className="h-auto w-auto p-2" variant="ghost">
@@ -82,7 +77,6 @@ export function ListOptions({ data, refetchLists, onAddCart,orgId }: ListOptions
             Copy list...
           </Button>
           <Separator />
-          {userRole === 'org:admin' && (
           <Button
             className="h-auto w-full justify-start rounded-none p-2 px-5 text-sm font-normal"
             variant="ghost"
@@ -90,9 +84,8 @@ export function ListOptions({ data, refetchLists, onAddCart,orgId }: ListOptions
             onClick={onDelete}
           >
             Delete this list...
-          </Button>)}
+          </Button>
         </PopoverContent>
       </Popover>
-    </SignedIn>
   )
 }

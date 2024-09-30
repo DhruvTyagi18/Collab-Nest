@@ -22,7 +22,7 @@ export function ListNavbar({ list,orgId }: ListNavbarProps) {
       <button onClick={handleBackClick} className="text-lg">
       &#11160; 
       </button>
-      <ListTitleForm initialData={list} boardId={list.boardId} />
+      <ListTitleForm initialData={list} boardId={list.boardId} orgId={orgId} />
       <div className="ml-auto">
         <ListOptions id={list.id} boardId={list.boardId} orgId={orgId}/>
       </div>

@@ -8,6 +8,8 @@ import { trpc } from '@/trpc/client'
 import { ListWithCards } from '@/types'
 import { ListForm } from './list-form'
 import { ListItem } from './list-item'
+import { useSession } from '@clerk/nextjs'
+import { checkUserRole } from '@/app/api/utils/userUtils'
 
 type ListContainerProps = {
   boardId: string
@@ -32,6 +34,8 @@ export function ListContainer({ boardId, initialData,orgId }: ListContainerProps
   )
 
   const [orderedData, setOrderedData] = useState(data)
+  const { session } = useSession();
+  const userRole = checkUserRole(session,orgId);
 
   useEffect(() => {
     setOrderedData(data)
@@ -152,7 +156,7 @@ export function ListContainer({ boardId, initialData,orgId }: ListContainerProps
           orgId={orgId}
         />
       ))}
-      <ListForm refetchLists={refetchLists} />
+      {userRole === 'org:admin' && (<ListForm refetchLists={refetchLists} />)}
       <div className="w-full flex-shrink-0" aria-hidden="true" />
     </ol>
   );

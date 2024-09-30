@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs'
+import { auth, useSession } from '@clerk/nextjs'
 import { HelpCircle, User2 } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import { FormPopover } from '@/components/form/form-popover'
 import { Hint } from '@/components/hint'
 import { Skeleton } from '@/components/ui/skeleton'
-import { MAX_FREE_BOARDS } from '@/constants/boards'
 import prisma from '@/lib/db'
 import { getAvailableCount } from '@/lib/org-limit'
 import { checkSubscription } from '@/lib/subscription'
@@ -51,15 +50,12 @@ export async function BoardList() {
             <p className="relative font-semibold text-white">{board.title}</p>
           </Link>
         ))}
-        <FormPopover side="right" sideOffset={10}>
+        <FormPopover side="right" sideOffset={10} orgId={orgId}>
           <div
             className="relative flex aspect-video h-full w-full flex-col items-center justify-center gap-y-1 rounded-sm bg-muted transition hover:opacity-75"
             role="button"
           >
             <p className="text-sm">Create new board</p>
-            <span className="text-xs">
-              {isPro ? 'Unlimited' : `${MAX_FREE_BOARDS - availableCount} remaining`}
-            </span>
             <Hint
               description={`Free workspaces can have upto 5 open boards. For unlimited boards upgrade this workspace.`}
               sideOffset={40}

@@ -11,6 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input'
 import { trpc } from '@/trpc/client'
 import { ListOptions } from './list-options'
+import { useSession } from '@clerk/nextjs'
+import { checkUserRole } from '@/app/api/utils/userUtils'
 
 type ListHeaderProps = {
   data: List
@@ -23,6 +25,8 @@ export function ListHeader({ data, refetchLists, onAddCard,orgId }: ListHeaderPr
   const formRef = useRef<ElementRef<'form'>>(null)
   const inputRef = useRef<ElementRef<'input'>>(null)
   const [isEditing, setIsEditing] = useState(false)
+  const { session } = useSession();
+  const userRole = checkUserRole(session,orgId);
   const router = useRouter() // Initialize useRouter for navigation
 
   const enableEditing = () => {
@@ -125,7 +129,7 @@ export function ListHeader({ data, refetchLists, onAddCard,orgId }: ListHeaderPr
         </div>
       )}
 
-      <ListOptions data={data} onAddCart={onAddCard} refetchLists={refetchLists} orgId={orgId} />
+      {userRole === 'org:admin' && (<ListOptions data={data} onAddCart={onAddCard} refetchLists={refetchLists} orgId={orgId} />)}
     </div>
   )
 }

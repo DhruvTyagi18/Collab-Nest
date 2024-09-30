@@ -10,17 +10,22 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { trpc } from '@/trpc/client'
+import { useSession } from '@clerk/nextjs'
+import { checkUserRole } from '@/app/api/utils/userUtils'
 
 type ListTitleFormProps = {
   initialData: List
   boardId: string
+  orgId: string
 }
 
-export function ListTitleForm({ initialData,boardId }: ListTitleFormProps) {
+export function ListTitleForm({ initialData,boardId,orgId }: ListTitleFormProps) {
   const formRef = useRef<ElementRef<'form'>>(null)
   const inputRef = useRef<ElementRef<'input'>>(null)
 
   const [isEditing, setIsEditing] = useState(false)
+  const { session } = useSession();
+  const userRole = checkUserRole(session,orgId);
 
   // Fetch data and refetch
   const { data, refetch } = trpc.list.getListById.useQuery(
@@ -111,14 +116,17 @@ export function ListTitleForm({ initialData,boardId }: ListTitleFormProps) {
       </Form>
     )
   }
-
-  return (
-    <Button
-      className="h-auto w-auto p-1 px-2 text-lg font-bold"
-      variant="transparent"
-      onClick={enableEditing}
-    >
-      {form.getValues('title')}
-    </Button>
-  )
+  
+  if (userRole === 'org:admin'){
+    return (
+      <Button
+        className="h-auto w-auto p-1 px-2 text-lg font-bold"
+        variant="transparent"
+        onClick={enableEditing}
+      >
+        {form.getValues('title')}
+      </Button>
+    )
+  }
+  return <p className="text-lg font-bold">{form.getValues('title')}</p>
 }

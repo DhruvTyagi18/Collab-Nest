@@ -1,9 +1,10 @@
 import { ElementRef, useRef, useState } from 'react';
-import { Draggable } from '@hello-pangea/dnd';
 import { ListWithCards } from '@/types';
 import { ListHeader } from './list-header';
 import { trpc } from '@/trpc/client';
 import { toast } from 'sonner';
+import { useSession } from '@clerk/nextjs';
+import { checkUserRole } from '@/app/api/utils/userUtils';
 
 type ListItemProps = {
   data: ListWithCards;
@@ -16,6 +17,8 @@ export function ListItem({ data, index, refetchLists,orgId }: ListItemProps) {
   const textAreaRef = useRef<ElementRef<'textarea'>>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(data.description || '');
+  const { session } = useSession();
+  const userRole = checkUserRole(session,orgId);
 
   // Use the trpc mutation hook
   const updateDescriptionMutation = trpc.list.updateDescription.useMutation();
@@ -58,7 +61,7 @@ export function ListItem({ data, index, refetchLists,orgId }: ListItemProps) {
       <div className="w-full rounded-md bg-[#f1f2f4] pb-2 shadow-md">
         <ListHeader data={data} onAddCard={enableEditing} refetchLists={refetchLists} orgId={orgId} />
         {/* Description Box */}
-        {isEditing ? (
+        {userRole === 'org:admin'?(isEditing ? (
           <textarea
             ref={textAreaRef}
             value={description}
@@ -70,11 +73,16 @@ export function ListItem({ data, index, refetchLists,orgId }: ListItemProps) {
         ) : (
           <div
             onClick={enableEditing}
-            className="p-2 text-gray-600 cursor-pointer text-xs whitespace-pre-wrap" // Add this class to preserve newlines
+            className="p-2 text-gray-600 cursor-pointer text-xs whitespace-pre-wrap" 
           >
             {description || 'Click here to add a description...'}
           </div>
-        )}
+        )
+      ):(
+        <div className="p-2 text-gray-600 text-xs whitespace-pre-wrap">
+            {description || 'No description available'}
+        </div>
+      )}
       </div>
     </li>
   );
