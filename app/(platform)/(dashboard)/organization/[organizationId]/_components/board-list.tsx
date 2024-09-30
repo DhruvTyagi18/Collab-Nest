@@ -27,7 +27,7 @@ export async function BoardList() {
   })
 
   const availableCount = await getAvailableCount()
-  const isPro = await checkSubscription()
+  //const isPro = await checkSubscription()
 
   return (
     <div className="space-y-4">
