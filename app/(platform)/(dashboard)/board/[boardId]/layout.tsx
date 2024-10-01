@@ -1,6 +1,5 @@
 import { auth } from '@clerk/nextjs'
 import { notFound, redirect } from 'next/navigation'
-
 import prisma from '@/lib/db'
 import { BoardNavbar } from './_components/board-navbar'
 
