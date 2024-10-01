@@ -3,6 +3,7 @@
 // export default function Page() {
 //   return <SignUp />
 // }
+
 "use client"; 
 import { useState } from 'react';
 import { SignUp } from '@clerk/nextjs';
