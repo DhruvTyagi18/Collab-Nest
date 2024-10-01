@@ -6,7 +6,7 @@ import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { MobileSidebar } from './mobile-sidebar'
 
-export default function Navbar() {
+export default function Navbar(orgId: any) {
   return (
     <nav className="fixed top-0 z-50 flex h-14 w-full items-center border-b bg-white px-4 shadow-sm">
       <MobileSidebar />
@@ -14,7 +14,7 @@ export default function Navbar() {
         <div className="hidden md:flex">
           <Logo />
         </div>
-        <FormPopover align="start" side="bottom" sideOffset={18}>
+        {/* <FormPopover align="start" side="bottom" sideOffset={18} orgId={orgId}>
           <Button
             size="sm"
             variant="primary"
@@ -23,11 +23,11 @@ export default function Navbar() {
             Create
           </Button>
         </FormPopover>
-        <FormPopover>
+        <FormPopover orgId={orgId}>
           <Button size="sm" variant="primary" className="block rounded-sm md:hidden">
             <Plus className="h-4 w-4" />
           </Button>
-        </FormPopover>
+        </FormPopover> */}
       </div>
       <div className="ml-auto flex items-center gap-x-2">
         <OrganizationSwitcher
