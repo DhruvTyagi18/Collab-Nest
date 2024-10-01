@@ -11,7 +11,7 @@ export default function Navbar(orgId: any) {
     <nav className="fixed top-0 z-50 flex h-14 w-full items-center border-b bg-white px-4 shadow-sm">
       <MobileSidebar />
       <div className="flex items-center gap-x-4">
-        <div className="hidden md:flex">
+        <div className="hidden md:flex"> 
           <Logo />
         </div>
         {/* <FormPopover align="start" side="bottom" sideOffset={18} orgId={orgId}>
