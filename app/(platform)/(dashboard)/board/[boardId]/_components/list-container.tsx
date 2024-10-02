@@ -146,7 +146,7 @@ export function ListContainer({ boardId, initialData,orgId }: ListContainerProps
   }
 
   return (
-    <ol className="flex flex-wrap gap-3 h-[80vh] overflow-y-auto">
+    <ol className="flex flex-wrap gap-3 overflow-y-auto">
       {orderedData.map((list, index) => (
         <ListItem
           data={list as any}

@@ -7,6 +7,7 @@ import { ElementRef, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { format } from 'date-fns'
 
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -66,6 +67,8 @@ export function Header({ data, refetchCard, refetchLists, refetchAuditLogs }: He
     })
   }
 
+  const formattedDate = format(new Date(data.createdAt), 'PPpp') // Example format
+
   return (
     <div className="mb-6 flex w-full items-start gap-x-3">
       <Layout className="mt-1 h-5 w-5 text-neutral-700" />
@@ -94,6 +97,9 @@ export function Header({ data, refetchCard, refetchLists, refetchAuditLogs }: He
         </Form>
         <p className="text-sm text-muted-foreground">
           in list <span className="underline">{data.list.title}</span>
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Created on: <span>{formattedDate}</span>
         </p>
       </div>
     </div>

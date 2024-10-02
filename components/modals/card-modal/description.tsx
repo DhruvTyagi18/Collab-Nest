@@ -1,7 +1,9 @@
+'use client'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlignLeft } from 'lucide-react'
 import { useParams } from 'next/navigation'
-import { ElementRef, useRef, useState } from 'react'
+import { ElementRef, useRef, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useEventListener, useOnClickOutside } from 'usehooks-ts'
@@ -29,6 +31,10 @@ export function Description({
 }: DescriptionProps) {
   const params = useParams()
   const [isEditing, setIsEditing] = useState(false)
+  const [isAddingLink, setIsAddingLink] = useState(false)
+  const [link, setLink] = useState('')
+  const [linkName, setLinkName] = useState('')
+  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
 
   const formRef = useRef<ElementRef<'form'>>(null)
   const textareaRef = useRef<ElementRef<'textarea'>>(null)
@@ -46,7 +52,7 @@ export function Description({
 
   const { mutate, isLoading } = trpc.card.updateCard.useMutation({
     onSuccess: ({ card }) => {
-      toast.success(`Card "${card.title} updated"`)
+      toast.success(`Card "${card.title}" updated`)
       disableEditing()
       refetchCard()
       refetchAuditLogs()
@@ -56,15 +62,22 @@ export function Description({
     },
   })
 
-  const enableEditing = () => {
+  const enableEditing = useCallback(() => {
     setIsEditing(true)
     setTimeout(() => {
       textareaRef.current?.focus()
-    })
-  }
+    }, 0)
+  }, [])
 
   const disableEditing = () => {
     setIsEditing(false)
+    setIsAddingLink(false)
+    setLink('')
+    setLinkName('')
+    if (clickTimeout) {
+      clearTimeout(clickTimeout)
+      setClickTimeout(null)
+    }
   }
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -82,11 +95,34 @@ export function Description({
     })
   }
 
+  const handleAddLink = () => {
+    if (link && linkName) {
+      const currentDescription = form.getValues('description')
+      form.setValue('description', currentDescription + ` [${linkName}](${link})`)
+      setIsAddingLink(false)
+      setLink('')
+      setLinkName('')
+    }
+  }
+
   useEventListener('keydown', onKeyDown)
   useOnClickOutside(formRef, disableEditing)
 
+  // Handle click events for editing
+  const handleClick = () => {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout) // Clear existing timeout
+      setClickTimeout(null) // Reset the timeout state
+      enableEditing(); // Enable editing on double click
+    } else {
+      setClickTimeout(setTimeout(() => {
+        setClickTimeout(null); // Reset timeout after 300ms
+      }, 300)); // Timeout for single click (300ms)
+    }
+  };
+
   return (
-    <div className="flex w-full items-start gap-x-3">
+    <div className="flex w-full items-start gap-x-3 relative"> {/* Make this relative for absolute positioning */}
       <AlignLeft className="mt-0.5 h-5 w-5 text-neutral-700" aria-hidden="true" />
       <div className="w-full">
         <p className="mb-2 font-semibold text-neutral-700">Description</p>
@@ -111,6 +147,33 @@ export function Description({
                   </FormItem>
                 )}
               />
+              {/* Adding link dialog */}
+              {isAddingLink && (
+                <div className="absolute w-[300px] top-8 left-2 flex flex-col gap-2 items-start bg-white p-4 rounded-md shadow-md z-10">
+                  <input
+                    type="text"
+                    placeholder="Enter link name to be displayed"
+                    value={linkName}
+                    onChange={(e) => setLinkName(e.target.value)}
+                    className="border p-2 rounded-md w-full text-xs"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Enter link URL"
+                    value={link}
+                    onChange={(e) => setLink(e.target.value)}
+                    className="border p-2 rounded-md w-full text-xs"
+                  />
+                  <div className="flex gap-2">
+                    <Button type="button" onClick={handleAddLink} size="sm" variant="primary" className="text-xs">
+                      Add Link
+                    </Button>
+                    <Button type="button" onClick={() => setIsAddingLink(false)} size="sm" variant="ghost" className="text-xs">
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center gap-x-2">
                 <Button variant="primary" type="submit" disabled={isLoading}>
                   Save
@@ -124,16 +187,28 @@ export function Description({
                 >
                   Cancel
                 </Button>
+                <Button
+                  type="button"
+                  onClick={() => setIsAddingLink(true)}
+                  size="sm"
+                  variant="secondary"
+                >
+                  Add Link
+                </Button>
               </div>
             </form>
           </Form>
         ) : (
           <div
-            onClick={enableEditing}
+            onClick={handleClick} // Use single click handler
             className="min-h-[78px] rounded-md bg-neutral-200 px-3.5 py-3 text-sm font-medium"
             role="button"
           >
-            {data.description || 'Add a more detailed description...'}
+            {data.description ? (
+              <div dangerouslySetInnerHTML={{ __html: data.description.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="text-blue-500 underline">$1</a>') }} />
+            ) : (
+              'Add a more detailed description...'
+            )}
           </div>
         )}
       </div>
