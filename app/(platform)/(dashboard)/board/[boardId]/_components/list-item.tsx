@@ -5,22 +5,23 @@ import { trpc } from '@/trpc/client';
 import { toast } from 'sonner';
 import { useSession } from '@clerk/nextjs';
 import { checkUserRole } from '@/app/api/utils/userUtils';
+import { useRouter } from 'next/navigation'; 
 
 type ListItemProps = {
   data: ListWithCards;
   index: number;
   refetchLists: any;
-  orgId:string;
+  orgId: string;
 };
 
-export function ListItem({ data, index, refetchLists,orgId }: ListItemProps) {
+export function ListItem({ data, index, refetchLists, orgId }: ListItemProps) {
   const textAreaRef = useRef<ElementRef<'textarea'>>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(data.description || '');
   const { session } = useSession();
-  const userRole = checkUserRole(session,orgId);
+  const userRole = checkUserRole(session, orgId);
+  const router = useRouter(); 
 
-  // Use the trpc mutation hook
   const updateDescriptionMutation = trpc.list.updateDescription.useMutation();
 
   const enableEditing = () => {
@@ -56,35 +57,43 @@ export function ListItem({ data, index, refetchLists,orgId }: ListItemProps) {
     }
   };
 
+  // Function to handle navigation to the list details
+  const handleReadMore = () => {
+    router.push(`/card/${data.id}`); 
+  };
+
   return (
     <li className="w-[272px] shrink-0 select-none">
       <div className="w-full rounded-md bg-[#f1f2f4] pb-2 shadow-md">
         <ListHeader data={data} onAddCard={enableEditing} refetchLists={refetchLists} orgId={orgId} />
         {/* Description Box */}
-        {userRole === 'org:admin'?(isEditing ? (
-          <textarea
-            ref={textAreaRef}
-            value={description}
-            onChange={handleDescriptionChange}
-            onBlur={handleDescriptionSave}
-            className="w-full p-2 border rounded"
-            rows={4}
-          />
+        {userRole === 'org:admin' ? (
+          isEditing ? (
+            <textarea
+              ref={textAreaRef}
+              value={description}
+              onChange={handleDescriptionChange}
+              onBlur={handleDescriptionSave}
+              className="w-full p-2 border rounded"
+              rows={4}
+            />
+          ) : (
+            <div
+              onClick={enableEditing}
+              className="p-2 text-gray-600 cursor-pointer text-xs whitespace-pre-wrap"
+            >
+              {description || 'Click here to add a description...'}
+            </div>
+          )
         ) : (
-          <div
-            onClick={enableEditing}
-            className="p-2 text-gray-600 cursor-pointer text-xs whitespace-pre-wrap" 
-          >
-            {description || 'Click here to add a description...'}
-          </div>
-        )
-      ):(
-        <div className="p-2 text-gray-600 text-xs whitespace-pre-wrap">
+          <div className="p-2 text-gray-600 text-xs whitespace-pre-wrap">
             {description || 'No description available'}
+          </div>
+        )}
+        <div className="p-2 text-blue-500 text-xs cursor-pointer" onClick={handleReadMore}>
+          Read more...
         </div>
-      )}
       </div>
     </li>
   );
-  
 }
