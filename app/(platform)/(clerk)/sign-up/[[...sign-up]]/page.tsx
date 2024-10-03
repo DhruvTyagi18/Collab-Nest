@@ -33,7 +33,7 @@ export default function Page() {
       {captchaVerified ? (
         <SignUp />
       ) : (
-        <p>Please complete the CAPTCHA to sign up.</p>
+        <p>Please complete the CAPTCHA to Sign Up.</p>
       )}
     </div>
   );
