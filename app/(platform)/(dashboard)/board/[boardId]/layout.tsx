@@ -55,7 +55,7 @@ export default async function BoardIdLayout({
     >
       <BoardNavbar board={board} orgId={orgId}/>
       <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
-      <main className="relative h-full pt-28">{children}</main>
+      <main className="relative h-full pt-28 overflow-y-auto">{children}</main>
     </div>
   )
 }
