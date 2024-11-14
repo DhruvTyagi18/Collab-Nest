@@ -16,7 +16,7 @@ export default function Page() {
     if (value) {
       setCaptchaVerified(true);  // CAPTCHA passed
     } else {
-      setCaptchaVerified(false); // CAPTCHA failed or reset
+      setCaptchaVerified(false); //  CAPTCHA failed or reset
     }
   };
   
