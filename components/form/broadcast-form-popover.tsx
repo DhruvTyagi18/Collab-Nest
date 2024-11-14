@@ -30,7 +30,7 @@ type FormPopoverProps = {
   orgId: string
 }
 
-export function FormPopover({
+export function BroadcastFormPopover({
   children,
   align,
   side = 'bottom',
@@ -40,19 +40,17 @@ export function FormPopover({
   const { onOpen } = useProModal()
   const router = useRouter()
   const closeRef = useRef<ElementRef<'button'>>(null)
-  const { session } = useSession();
-  const userRole = checkUserRole(session, orgId); // Get user role
 
   const form = useForm<TCreateBoardValidator>({
     resolver: zodResolver(CreateBoardValidator),
   })
 
-  const { mutate, isLoading } = trpc.board.createBoard.useMutation({
+  const { mutate, isLoading } = trpc.board.createBroadcastBoard.useMutation({
     onSuccess: ({ board }) => {
       toast.success('Board created!')
       closeRef.current?.click()
       form.reset()
-      router.push(`/board/${board.id}`)
+      router.push(`/bboard/${board.id}`)
     },
     onError: (err) => {
       toast.error(err.message)
@@ -78,8 +76,6 @@ export function FormPopover({
             <X className="h-4 w-4" />
           </Button>
         </PopoverClose>
-
-        {userRole === 'org:admin' || orgId==='b_123' ? ( // Only show the form if the user is an admin
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -133,11 +129,6 @@ export function FormPopover({
               </Button>
             </form>
           </Form>
-        ) : (
-          <div className="text-center text-sm text-red-600">
-            You do not have permission to create a board.
-          </div>
-        )}
       </PopoverContent>
     </Popover>
   )

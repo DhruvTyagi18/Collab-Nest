@@ -1,0 +1,61 @@
+import { auth } from '@clerk/nextjs'
+import { notFound, redirect } from 'next/navigation'
+import prisma from '@/lib/db'
+import { BoardNavbar } from './_components/board-navbar'
+
+export async function generateMetadata({ params }: { params: { bboardId: string } }) {
+  const orgId='b_123'
+
+  if (!orgId) {
+    return {
+      title: 'Board',
+    }
+  }
+
+  const board = await prisma.board.findUnique({
+    where: {
+      id: params.bboardId,
+      orgId,
+    },
+  })
+
+  return {
+    title: board?.title || 'Board',
+  }
+}
+
+export default async function BoardIdLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: { bboardId: string }
+}) {
+  const orgId='b_123'
+
+  if (!orgId) {
+    return redirect('/select-org')
+  }
+
+  const board = await prisma.board.findUnique({
+    where: {
+      id: params.bboardId,
+      orgId,
+    },
+  })
+
+  if (!board) {
+    notFound()
+  }
+  
+  return (
+    <div
+      style={{ backgroundImage: `url(${board.imageFullUrl})` }}
+      className="relative h-full bg-cover bg-center bg-no-repeat"
+    >
+      <BoardNavbar board={board} orgId={orgId}/>
+      <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
+      <main className="relative h-full pt-28 overflow-y-auto">{children}</main>
+    </div>
+  )
+}
